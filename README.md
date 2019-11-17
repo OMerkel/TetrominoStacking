@@ -18,7 +18,12 @@ Game play continues until it is impossible to place a remaining tetromino shape.
 
 * jQuery: MIT licensed, https://github.com/jquery/jquery
 * jQuery Mobile: MIT licensed, https://github.com/jquery/jquery-mobile
-* Raphaël: MIT licensed, http://www.raphaeljs.com
+* RaphaÃ«l: MIT licensed, http://www.raphaeljs.com
+
+# Links
+
+* An essay on [Intellectual Property and Usage of Related Terminology in Tetrominoes](https://desiree47.wordpress.com)
+* [Tetrominoes on Wikipedia](https://en.wikipedia.org/wiki/Tetromino)
 
 # Contributors / Authors
 
