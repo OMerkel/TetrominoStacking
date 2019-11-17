@@ -1,0 +1,22 @@
+{
+  "version": "0.1",
+  "name": "TetrominoStacking",
+  "description": "Tetromino Stacking",
+  "launch_path": "/TetrominoStacking/html5/src/index.html",
+  "icons": {
+    "16": "/TetrominoStacking/html5/src/img/icons/tetromino16.png",
+    "32": "/TetrominoStacking/html5/src/img/icons/tetromino32.png",
+    "48": "/TetrominoStacking/html5/src/img/icons/tetromino48.png",
+    "60": "/TetrominoStacking/html5/src/img/icons/tetromino60.png",
+    "64": "/TetrominoStacking/html5/src/img/icons/tetromino64.png",
+    "90": "/TetrominoStacking/html5/src/img/icons/tetromino90.png",
+    "120": "/TetrominoStacking/html5/src/img/icons/tetromino120.png",
+    "128": "/TetrominoStacking/html5/src/img/icons/tetromino128.png",
+    "256": "/TetrominoStacking/html5/src/img/icons/tetromino256.png"
+  },
+  "developer": {
+    "name": "Oliver Merkel",
+    "url": "https://github.com/OMerkel/TetrominoStacking"
+  },
+  "installs_allowed_from": ["*"]
+}

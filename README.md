@@ -1,4 +1,4 @@
-Tetromino Stacking
+<img alt="Tetromino Stacking icon" width="64" src="html5/src/img/icons/tetromino64.png" /> Tetromino Stacking
 ==================
 
 __Abstract__ _Try to best pack falling [tetromino](https://en.wikipedia.org/wiki/Tetromino) shapes on a grid in this game.
