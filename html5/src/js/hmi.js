@@ -25,7 +25,6 @@ const EDGEWALL = -3;
 const BLOCKSRC = 'fgkfgkfgkfgkfnoikmefngikiklbfniklbfnfnmeik' +
   'fgnikomnkeinfgifkofikfkniknfinefkgkninofim';
 const colors = ['red', 'blue', 'green', 'cyan', 'orange', 'yellow', 'violet'];
-const delay = 300;
 
 function Hmi() {
   this.orientation = {
@@ -216,15 +215,10 @@ Hmi.prototype.clearGrid = function () {
 };
 
 Hmi.prototype.initGame = function () {
-  if ( null != this.timerID ) {
-    clearInterval( this.timerID );
-    this.timerID = null;
-  }
   this.score = 0;
   this.nextTileFromQueue();
   this.updateChallenge();
   this.clearGrid();
-  this.timerID = setInterval( this.letTileFall.bind(this), delay);
   this.isPaused = false;
   $('#left-panel').panel('close');
 };
@@ -283,6 +277,7 @@ Hmi.prototype.controlRotate = function ( p, t, clockwise, color, handler ) {
 Hmi.prototype.init = function () {
   this.initGame();
   var $window = $(window);
+  window.addEventListener("orientationchange", this.resize.bind( this ));
   $window.resize( this.resize.bind( this ) );
   $window.resize();
   this.updateChallenge();
@@ -465,6 +460,12 @@ Hmi.prototype.updateChallenge = function() {
   this.setHeader();
   var multiColored = $('#multicolor').is(':checked');
   var mainColor = $('#maincolor').val();
+  var delay = Number($('#delay').val());
+  if ( null != this.timerID ) {
+    clearInterval( this.timerID );
+    this.timerID = null;
+  }
+  this.timerID = setInterval( this.letTileFall.bind(this), delay);
   for( var n=0; n<this.tileQueue.type.length; ++n ) {
     for( var y=0; y<4; ++y ) {
       for( var x=0; x<4; ++x ) {
