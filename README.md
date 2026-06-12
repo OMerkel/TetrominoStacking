@@ -3,10 +3,6 @@
 
 * <em>Start a session in browser on https://omerkel.github.io/TetrominoStacking/html5/src/index.html </em>
 
-__Abstract__ _Try to best pack [polyomino](https://en.wikipedia.org/wiki/Polyomino) shapes on a square grid (sized 9x9) in this game._
-
-__Keywords, Categories__ _Puzzle, Solitaire, Single Player, Games/Entertainment, Mobile, JavaScript, ECMAScript_
-
 __Abstract__ _Try to best pack falling [tetromino](https://en.wikipedia.org/wiki/Tetromino) shapes on a grid in this game.
 Completed horizontal lines are removed and remaining shapes above will fall down._
 
