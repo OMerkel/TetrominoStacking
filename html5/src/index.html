@@ -1,248 +1,183 @@
 <!DOCTYPE html>
-<html>
-<head profile='http://dublincore.org/documents/dcq-html/'>
-  <link rel='icon' href='img/icons/favicon.ico' type='image/x-icon' />
-  <link rel='schema.DC' href='http://purl.org/dc/elements/1.1/' />
-  <link rel='schema.DCTERMS' href='http://purl.org/dc/terms/' />
-  <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-  <meta charset='UTF-8' />
-  <meta name='AUTHOR' content='Oliver Merkel' />
-  <meta name='COPYRIGHT' content='Oliver Merkel' />
-  <meta name='DC.creator' content='Oliver Merkel' />
-  <meta name='DC.contributor' content='Oliver Merkel' />
-  <meta name='DC.rights' content="
-See file named LICENSE being part of the repository.
-
-Copyright (c) 2019
-@author Oliver Merkel, Merkel(dot)Oliver(at)web(dot)de.
-All rights reserved.
-
-Logos, brands, and trademarks belong to their respective owners.
-
-All source code also including code parts written in HMTL, Javascript, CSS is under MIT License.
-
-The MIT License (MIT)
-
-Copyright (c) 2019 Oliver Merkel, Merkel(dot)Oliver(at)web(dot)de
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the &quot;Software&quot;), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-If not otherwise stated all graphics (independent of its format) are licensed under
-    http://creativecommons.org/licenses/by-nc-sa/4.0
-    Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-" />
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="author" content="Oliver Merkel" />
+  <meta name="description" content="Tetromino Stacking – a solitaire tile stacking game" />
   <title>Tetromino Stacking</title>
-  <meta name='apple-mobile-web-app-capable' content='yes' />
-  <meta name='apple-mobile-web-app-status-bar-style' content='black' />
-  <link rel='apple-touch-icon' href='img/icons/tetromino128.png' />
-  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-    name='viewport' />
-  <link rel='stylesheet' type='text/css' href='thirdparty/jquery.mobile-1.4.5/jquery.mobile-1.4.5.css' />
-  <link rel='stylesheet' type='text/css' href='css/index.css' />
-  <script src='thirdparty/jquery-2.2.4.js' type='text/javascript'></script>
-  <script src='thirdparty/jquery.mobile-1.4.5/jquery.mobile-1.4.5.js' type='text/javascript'></script>
-  <script src='thirdparty/raphael-2.2.0/raphael.js' type='text/javascript'></script>
-  <script src='js/hmi.js' type='text/javascript' defer></script>
+  <link rel="icon" href="img/icons/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="img/icons/tetromino128.png" />
+  <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <script src="js/app.js" type="module"></script>
 </head>
 <body>
-<div data-role='page' data-theme='b' id='game-page' class='mybackground'>
-  <div data-role='header' data-position='fixed'>
-    <center id='myheader'>Tetromino Stacking</center>
-    <a href='#left-panel' id='customMenu' class='customMenu'
-      data-icon='custom' data-iconpos='notext'>Menu</a>
-  </div><!-- /header -->
-  <div role='main' class='mycontent ui-content'>
+
+  <!-- ── Top bar ─────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <button id="menu-toggle" class="icon-btn" aria-label="Open menu" aria-haspopup="true">&#9776;</button>
+    <h1 class="game-title">Tetromino Stacking</h1>
+    <p id="score-label" class="score-label">Score: 0 | Lines: 0 | Running</p>
+  </header>
+
+  <!-- ── Main game area ──────────────────────────────────────────── -->
+  <main class="game-area">
     <noscript>
-      <p>This HTML5 application depends on enabled Javascript capabilities in your browser.</p>
-      <p>Please consider enabling Javascript if disabled through settings.</p>
+      <p class="noscript-notice">This application requires JavaScript. Please enable it in your browser settings.</p>
     </noscript>
-    <center>
-      <div id='board'></div>
-    </center>
-  </div><!-- /content -->
-  <div data-role='panel' id='left-panel' data-position='left'
-    data-display='overlay' data-theme='b'>
-    <ul data-role='listview' data-theme='b' data-divider-theme='d'
-      data-icon='false' data-global-nav='demos' class='jqm-list'>
-      <li data-icon='carat-l' data-rel='close'><a href='#'>Close Menu</a></li>
-      <li data-role='list-divider'>&nbsp;</li>
-      <li data-icon='refresh'><a id='restart'>Restart</a></li>
-      <li data-role='list-divider'>&nbsp;</li>
-      <li data-icon='info'><a href='#rules-page' data-rel='page'
-        data-transition='pop'>Rules&#8230;</a></li>
-      <li data-icon='grid'><a href='#options-menu' data-rel='page'
-        data-transition='slideup'>Options&#8230;</a></li>
-      <li data-icon='info'><a href='#about-page' data-rel='page'
-        data-transition='pop'>About&#8230;</a></li>
+
+    <div class="board-wrap">
+      <div id="board" class="board" tabindex="-1" role="grid" aria-label="Game board"></div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h2 class="sidebar-label">Next</h2>
+        <div id="queue" class="queue"></div>
+      </div>
+
+      <div class="sidebar-section controls-pad">
+        <div class="controls-row">
+          <button id="rotate-left"  class="ctrl-btn" aria-label="Rotate left">&#8634;</button>
+          <button id="soft-drop"    class="ctrl-btn ctrl-drop" aria-label="Soft drop">&#8595;</button>
+          <button id="rotate-right" class="ctrl-btn" aria-label="Rotate right">&#8635;</button>
+        </div>
+        <div class="controls-row">
+          <button id="move-left"  class="ctrl-btn" aria-label="Move left">&#8592;</button>
+          <div class="ctrl-spacer"></div>
+          <button id="move-right" class="ctrl-btn" aria-label="Move right">&#8594;</button>
+        </div>
+        <div class="controls-row">
+          <button id="pause-toggle" class="ctrl-btn ctrl-wide" aria-label="Pause">Pause</button>
+        </div>
+        <div class="controls-row">
+          <button id="restart" class="ctrl-btn ctrl-wide" aria-label="Restart">Restart</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section keyboard-hint">
+        <p>&#8592;&#8594; move &nbsp; Z/X rotate</p>
+        <p>&#8595; soft drop &nbsp; Space hard drop</p>
+        <p>P pause</p>
+        <p>Swipe &#8592;&#8594; move &nbsp; tap rotate</p>
+        <p>Swipe &#8595; soft drop &nbsp; &#8593; hard drop</p>
+      </div>
+
+      <div class="sidebar-section leaderboard">
+        <h2 id="leaderboard-label" class="sidebar-label">High Scores (300-399 ms)</h2>
+        <ol id="leaderboard-list" class="leaderboard-list" aria-labelledby="leaderboard-label"></ol>
+        <button id="leaderboard-reset" class="ctrl-btn ctrl-wide" aria-label="Reset high scores">Reset scores</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ── Slide-over navigation menu ─────────────────────────────── -->
+  <nav id="main-nav" class="main-nav is-hidden" aria-label="Game menu">
+    <ul class="nav-list">
+      <li><button id="nav-restart" class="nav-btn">&#8635; Restart</button></li>
+      <li><button id="nav-options" class="nav-btn">&#9881; Options&hellip;</button></li>
+      <li><button id="nav-rules"   class="nav-btn">&#10067; Rules&hellip;</button></li>
+      <li><button id="nav-about"   class="nav-btn">&#9432; About&hellip;</button></li>
     </ul>
-  </div><!-- /panel -->
-</div><!-- /page -->
-<div data-role='page' data-theme='b' id='rules-page'>
-  <div data-role='header'>
-    <a href='#' data-rel='back' id='customBackRules'
-      class='customBack ui-btn ui-icon-custom ui-btn-icon-right ui-btn-icon-notext ui-corner-all'>Back</a>
-    <h4>Rules</h4>
-  </div><!-- /header -->
-  <div role='main' class='ui-content'>
-    <br />
-    <p>Try to best pack falling tetromino shapes on a grid in this game.
-    The player can move the falling shape horizontally or turn it clockwise
-    or anti-clockwise. Completed horizontal lines are removed and remaining
-    shapes above will fall down automatically then. Game play continues
-    until it is impossible to place a remaining tetromino shape.</p>
-    <br clear='all' />
-    <p>Have fun and enjoy the game&#8230;</p>
-    <a href='#' data-role='button' data-icon='back'
-      data-rel='back'>Back</a>
-  </div><!-- /content -->
-</div><!-- /page -->
+  </nav>
 
-<div data-role='page' data-theme='b' id='options-menu'>
-  <div data-role='header'>
-    <h1><small>Options</small></h1>
-    <a href='#' data-rel='back' id='customBackOptions'
-      class='customBack ui-btn ui-icon-custom ui-btn-icon-left ui-btn-icon-notext ui-corner-all'>Close</a>
-  </div><!-- /header -->
-  <div data-role='content'>
-    <br />
-    <form>
-    <fieldset data-role="controlgroup">
-      <legend>Main color</legend>
-      <input type="color" name="maincolor" id="maincolor" value="#00ffff">
-    </fieldset>
-    </form>
-    <form>
-      <fieldset data-role='controlgroup'>
-        <legend>Display tetrominoes in </legend>
-        <input name='colortype' id='monocolor'
-          type='radio' />
-        <label for='monocolor'>
-          mono color
-        </label>
-        <input name='colortype' id='multicolor'
-          type='radio' checked='checked' />
-        <label for='multicolor'>
-          multi color
-        </label>
-      </fieldset>
-    </form>
-    <form>
-      <fieldset data-role='controlgroup'>
-        <legend>Delay</legend>
-        <input type='range' id='delay' min='300' max='600' step='50' value='300' />
-      </fieldset>
-    </form>
-    <a href='#' id='customOkOptions' data-role='button' data-icon='check'
-      data-rel='back' data-theme='c'>Ok</a>
-  </div><!-- /content -->
-</div><!-- /page -->
+  <!-- ── Options subpage ─────────────────────────────────────────── -->
+  <section id="options-page" class="subpage is-hidden" role="dialog" aria-modal="true" aria-label="Options">
+    <div class="subpage-inner">
+      <header class="subpage-header">
+        <h2>Options</h2>
+        <button id="options-close" class="icon-btn" aria-label="Close options">&#10005;</button>
+      </header>
+      <form class="options-form" onsubmit="return false;">
+        <fieldset>
+          <legend>Colour mode</legend>
+          <label class="radio-label">
+            <input type="radio" name="colortype" id="monocolor" value="mono" />
+            Mono colour
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="colortype" id="multicolor" value="multi" checked />
+            Multi colour
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Main colour</legend>
+          <label class="field-label" for="maincolor">Colour</label>
+          <input type="color" id="maincolor" name="maincolor" value="#00ffff" />
+        </fieldset>
+        <fieldset>
+          <legend>Tick delay</legend>
+          <label class="field-label" for="delay">
+            Delay: <output id="delay-output">300</output> ms
+          </label>
+          <input type="range" id="delay" name="delay" min="100" max="600" step="50" value="300" />
+        </fieldset>
+      </form>
+      <footer class="subpage-footer">
+        <button id="options-ok"     class="action-btn primary">OK</button>
+        <button id="options-cancel" class="action-btn">Cancel</button>
+      </footer>
+    </div>
+  </section>
 
-<div data-role='page' data-theme='b' id='about-page'>
-  <div data-role='header'>
-    <a href='#' data-rel='back' id='customBackAbout'
-      class='customBack ui-btn ui-icon-custom ui-btn-icon-right ui-btn-icon-notext ui-corner-all'>Back</a>
-    <h4>About Tetromino Stacking</h4>
-  </div><!-- /header -->
-  <div role='main' class='ui-content'>
-    <figure class='author' style='float: right;'>
-      <img src='img/oliver1912.jpg' />
-      <figcaption>Oliver Merkel, <a rel='license'
-        href='http://creativecommons.org/licenses/by-nc-nd/4.0'
-        target='_blank'>cc-by-nc-nd 4.0</a>.</figcaption>
-    </figure>
-    <br />
-    <h3>Legal</h3>
-    <p>Copyright (c) 2019<br />
-    <b>@author</b> <em>Oliver Merkel</em>, Merkel(dot) Oliver(at) web(dot) de.<br />
-    All rights reserved.<br />
-    Logos, brands, and trademarks belong to their respective owners.</p>
-    <p>All source code also including code parts written in HMTL, Javascript, CSS is under MIT License.</p>
-    <h4>The MIT License (MIT)</h4>
-    <p>Copyright (c) 2019 Oliver Merkel, Merkel(dot) Oliver(at) web(dot)de</p>
+  <!-- ── Rules subpage ───────────────────────────────────────────── -->
+  <section id="rules-page" class="subpage is-hidden" role="dialog" aria-modal="true" aria-label="Rules">
+    <div class="subpage-inner">
+      <header class="subpage-header">
+        <h2>Rules</h2>
+        <button id="rules-close" class="icon-btn" aria-label="Close rules">&#10005;</button>
+      </header>
+      <div class="subpage-body">
+        <p>Try to pack falling tetromino shapes as tightly as possible on the grid.
+          Move the falling piece left or right, rotate it clockwise or anti-clockwise.
+          Completed horizontal lines are cleared and remaining pieces fall down.
+          The game ends when a new piece cannot be placed.</p>
+        <p>Controls:</p>
+        <ul>
+          <li><strong>&#8592; / &#8594;</strong> – move left / right</li>
+          <li><strong>Z / X</strong> – rotate left / right</li>
+          <li><strong>&#8595;</strong> – soft drop one row</li>
+          <li><strong>Space</strong> – hard drop to bottom</li>
+          <li><strong>P</strong> – pause / resume</li>
+        </ul>
+        <p>Have fun!</p>
+      </div>
+    </div>
+  </section>
 
-    <p>Permission is hereby granted, free of charge, to any person obtaining a copy of
-    this software and associated documentation files (the &quot;Software&quot;), to deal in
-    the Software without restriction, including without limitation the rights to
-    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-    the Software, and to permit persons to whom the Software is furnished to do so,
-    subject to the following conditions:</p>
+  <!-- ── About subpage ───────────────────────────────────────────── -->
+  <section id="about-page" class="subpage is-hidden" role="dialog" aria-modal="true" aria-label="About">
+    <div class="subpage-inner">
+      <header class="subpage-header">
+        <h2>About Tetromino Stacking</h2>
+        <button id="about-close" class="icon-btn" aria-label="Close about">&#10005;</button>
+      </header>
+      <div class="subpage-body">
+        <figure class="author-figure">
+          <img src="img/oliver1912.jpg" alt="Oliver Merkel" />
+          <figcaption>Oliver Merkel,
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0"
+              target="_blank" rel="noopener">cc-by-nc-nd 4.0</a>.
+          </figcaption>
+        </figure>
+        <h3>Legal</h3>
+        <p>Copyright &copy; 2019<br />
+          <strong>Author:</strong> <em>Oliver Merkel</em>, Merkel(dot)Oliver(at)web(dot)de.<br />
+          All rights reserved.<br />
+          Logos, brands, and trademarks belong to their respective owners.</p>
+        <p>All source code (HTML, JavaScript, CSS) is released under the
+          <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a>.</p>
+        <p>Graphics (unless stated otherwise) are licensed under
+          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0"
+            target="_blank" rel="noopener">Creative Commons Attribution-NonCommercial-ShareAlike 4.0</a>.</p>
+        <h3>About the Game</h3>
+        <p>A Tetromino is a geometric shape composed of exactly four equal-sized squares joined
+          edge-to-edge. The concept of stacking such shapes is in the public domain.</p>
+      </div>
+    </div>
+  </section>
 
-    <p>The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.</p>
-
-    <p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-
-    <p>If not otherwise stated all graphics (independent of its format) are licensed under
-      <br /><a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0'
-      target='_blank'><img alt='Creative Commons License' style='border-width:0'
-      src='img/icons/cc_by_nc_sa.png' /></a><br />
-      <a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0'
-      target='_blank'>Creative Commons Attribution-NonCommercial-ShareAlike 4.0
-      International License</a>.
-    </p>
-
-    <div data-role='collapsible-set' data-theme='c' data-content-theme='d'
-      data-iconpos='right' data-collapsed-icon='arrow-l' data-expanded-icon='arrow-d'>
-    <div data-role='collapsible'>
-      <h4>Tetromino Stacking Principles and Concepts</h4>
-      <p><em>Tetromino Stacking</em> implements a solitaire action game.</p>
-      <p>The term Tetromino decribes a geometric shape. A Tetromino consists
-        of exactly four concatenated equal sized squares. Numerous puzzles
-        and games exist using such Tetrominoes to form or fill a given
-        greater shape.
-        While trademarks for specific games exist the concept of stacking tiles
-        or shapes like in Tetromino Stacking is in the Public Domain.</p>
-    </div><!-- collapsible -->
-    <div data-role='collapsible'>
-      <h4>Third Party Code Licenses</h4>
-      <p>This <b>Tetromino Stacking</b> implementation uses unmodified
-      independent code libraries provided by <em>third parties</em>.
-      Since their licenses might vary the corresponding information is
-      <em>externally linked</em> below. Thus <em>these external links</em>
-      will enable you to reproduce any copyright notice,
-      any related list of conditions, disclaimers, and especially
-      the copyright holders and authors of the corresponding third
-      party functionality.</p>
-      <a href='https://github.com/jquery/jquery' data-role='button' data-theme='c'
-        rel='external' target='_blank' type='text/html'
-        title='jQuery - Repository'>
-        <img src='thirdparty/jquery-favicon.ico' width='16' height='16' />
-        jQuery: MIT</a>
-      <a href='https://github.com/jquery/jquery-mobile' data-role='button' data-theme='c'
-        rel='external' target='_blank' type='text/html'
-        title='jQuery Mobile - Repository'>
-        <img src='thirdparty/jquery.mobile-1.4.5/demos/favicon.ico' width='16' height='16' />
-        jQuery Mobile: MIT</a>
-      <a href='https://github.com/DmitryBaranovskiy/raphael' data-role='button' data-theme='c'
-        rel='external' target='_blank' type='text/html'
-        title='Raphaël - Repository'>
-        <img src='thirdparty/raphael-2.2.0/raphael_logo.png' width='16' height='16' />
-        Raphaël: MIT</a>
-    </div><!-- collapsible -->
-    </div><!-- collapsible-set -->
-    <a href='#' data-role='button' data-icon='back'
-      data-rel='back'>Back</a>
-  </div><!-- /content -->
-</div><!-- /page -->
 </body>
 </html>
+
+

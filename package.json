@@ -1,0 +1,21 @@
+{
+  "name": "tetromino-stacking",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "npm run lint:md && npm run lint:biome",
+    "lint:md": "markdownlint \"**/*.md\" --ignore node_modules --ignore coverage",
+    "lint:biome": "biome check .",
+    "lint:shellcheck": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/run-shellcheck.ps1",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "jsdom": "^24.1.1",
+    "markdownlint-cli": "^0.42.0",
+    "vitest": "^2.0.5",
+    "@vitest/coverage-v8": "^2.0.5"
+  }
+}
