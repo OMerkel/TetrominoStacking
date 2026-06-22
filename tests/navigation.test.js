@@ -15,6 +15,7 @@ const buildDom = () => {
     <button id="nav-options">Options</button>
     <button id="nav-rules">Rules</button>
     <button id="nav-about">About</button>
+    <button id="nav-close">Close</button>
 
     <div id="board" tabindex="-1"></div>
     <section id="options-page" class="subpage is-hidden"></section>
@@ -31,7 +32,9 @@ const buildDom = () => {
     <button id="options-cancel">Cancel</button>
     <button id="options-close">Close</button>
     <button id="rules-close">Close</button>
+    <button id="rules-back">Back</button>
     <button id="about-close">Close</button>
+    <button id="about-back">Back</button>
   `;
 
   return {

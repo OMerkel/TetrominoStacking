@@ -104,8 +104,9 @@ label {
 }
 
 .cell.active {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0
-    rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* -- Sidebar --------------------------------------------------------------- */
@@ -275,6 +276,13 @@ label {
   padding: 0 10px;
 }
 
+.nav-divider {
+  height: 1px;
+  background: var(--surface-2);
+  margin: 12px 0;
+  opacity: 0.5;
+}
+
 .nav-btn {
   width: 100%;
   background: transparent;
@@ -294,27 +302,29 @@ label {
   outline: none;
 }
 
+.nav-close-btn {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* -- Subpages (options / rules / about) ------------------------------------ */
 .subpage {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--bg);
   z-index: 200;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .subpage-inner {
-  background: var(--surface);
-  border: 1px solid var(--surface-2);
-  border-radius: var(--radius);
-  width: min(460px, 100%);
-  max-height: 90vh;
-  overflow-y: auto;
+  background: var(--bg);
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .subpage-header {
@@ -322,30 +332,37 @@ label {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--surface-2);
+  border-bottom: 2px solid var(--surface-2);
+  background: var(--surface);
+  flex-shrink: 0;
 }
 
 .subpage-header h2 {
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
+  flex: 1;
 }
 
 .subpage-body {
-  padding: 16px;
-  font-size: 0.9rem;
+  padding: 20px 16px;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: var(--ink-dim);
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
 
 .subpage-body h3 {
   color: var(--ink);
-  margin-top: 14px;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .subpage-body ul {
-  padding-left: 18px;
+  padding-left: 20px;
+  margin-bottom: 12px;
 }
 
 .subpage-body a {
@@ -353,11 +370,18 @@ label {
 }
 
 .subpage-footer {
-  padding: 12px 16px;
+  padding: 14px 16px;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
-  border-top: 1px solid var(--surface-2);
+  align-items: center;
+  border-top: 2px solid var(--surface-2);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.subpage-footer #rules-back,
+.subpage-footer #about-back {
+  margin-right: auto;
 }
 
 /* -- Options form ---------------------------------------------------------- */
@@ -440,6 +464,10 @@ input[type="color"] {
   filter: brightness(1.15);
 }
 
+.subpage-footer .action-btn {
+  flex-shrink: 0;
+}
+
 /* -- Pause state ----------------------------------------------------------- */
 .ctrl-btn.is-paused {
   background: var(--accent);
@@ -466,7 +494,7 @@ input[type="color"] {
 
 /* -- Utility --------------------------------------------------------------- */
 .is-hidden {
-  display: none !important;
+  display: none;
 }
 
 .noscript-notice {

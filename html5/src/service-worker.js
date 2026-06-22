@@ -46,10 +46,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (
-            cacheName !== CACHE_STATIC &&
-            cacheName !== CACHE_DYNAMIC
-          ) {
+          if (cacheName !== CACHE_STATIC && cacheName !== CACHE_DYNAMIC) {
             return caches.delete(cacheName);
           }
           return null;
@@ -96,32 +93,34 @@ function cacheFirstStrategy(request) {
       return cachedResponse;
     }
 
-    return fetchWithTimeout(request, CACHE_TIMEOUT).then((networkResponse) => {
-      // Don't cache non-successful responses
-      if (!networkResponse || networkResponse.status !== 200) {
+    return fetchWithTimeout(request, CACHE_TIMEOUT)
+      .then((networkResponse) => {
+        // Don't cache non-successful responses
+        if (networkResponse?.status !== 200) {
+          return networkResponse;
+        }
+
+        // Clone and cache successful responses
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_STATIC).then((cache) => {
+          cache.put(request, responseToCache);
+        });
+
         return networkResponse;
-      }
-
-      // Clone and cache successful responses
-      const responseToCache = networkResponse.clone();
-      caches.open(CACHE_STATIC).then((cache) => {
-        cache.put(request, responseToCache);
+      })
+      .catch(() => {
+        // Network failed; try cache as fallback
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Return offline placeholder for images
+          if (request.destination === "image") {
+            return createOfflineImage();
+          }
+          return createOfflineResponse();
+        });
       });
-
-      return networkResponse;
-    }).catch(() => {
-      // Network failed; try cache as fallback
-      return caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Return offline placeholder for images
-        if (request.destination === "image") {
-          return createOfflineImage();
-        }
-        return createOfflineResponse();
-      });
-    });
   });
 }
 
@@ -133,7 +132,7 @@ function networkFirstStrategy(request) {
   return fetchWithTimeout(request, CACHE_TIMEOUT)
     .then((networkResponse) => {
       // Don't cache non-successful responses
-      if (!networkResponse || networkResponse.status !== 200) {
+      if (networkResponse?.status !== 200) {
         return networkResponse;
       }
 
@@ -174,10 +173,7 @@ function fetchWithTimeout(request, timeout) {
   return Promise.race([
     fetch(request),
     new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("Network timeout")),
-        timeout,
-      ),
+      setTimeout(() => reject(new Error("Network timeout")), timeout),
     ),
   ]);
 }

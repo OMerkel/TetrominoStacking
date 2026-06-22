@@ -27,9 +27,11 @@ const pruneExpired = (leaderboard, nowMs) => {
   const minTimestamp = nowMs - MONTH_MS;
   const nextBuckets = {};
 
-  for (const [bucketKey, entries] of Object.entries(leaderboard.buckets ?? {})) {
-    const filtered = (entries ?? []).filter((entry) =>
-      safeNumber(entry.at, 0) >= minTimestamp,
+  for (const [bucketKey, entries] of Object.entries(
+    leaderboard.buckets ?? {},
+  )) {
+    const filtered = (entries ?? []).filter(
+      (entry) => safeNumber(entry.at, 0) >= minTimestamp,
     );
     if (filtered.length > 0) {
       nextBuckets[bucketKey] = filtered;
@@ -79,7 +81,11 @@ export const formatDelayRange = (tickMs) => {
   return `${start}-${end} ms`;
 };
 
-export const recordHighScore = (storage, { score, lines, tickMs }, nowMs = Date.now()) => {
+export const recordHighScore = (
+  storage,
+  { score, lines, tickMs },
+  nowMs = Date.now(),
+) => {
   const leaderboard = readLeaderboard(storage, nowMs);
   const bucket = bucketForDelay(tickMs);
   const nextEntry = {

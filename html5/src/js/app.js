@@ -7,16 +7,16 @@ import {
   renderQueue,
 } from "./app/controller.js";
 import {
-  applyStateToOptionsForm,
-  bindNavigationAndSubpages,
-} from "./app/navigation.js";
-import {
   clearHighScores,
   getHighScoresForDelay,
   recordHighScore,
 } from "./app/leaderboard.js";
-import { projectBoardWithActivePiece } from "./core/engine.js";
+import {
+  applyStateToOptionsForm,
+  bindNavigationAndSubpages,
+} from "./app/navigation.js";
 import { registerServiceWorker } from "./app/service-worker-client.js";
+import { projectBoardWithActivePiece } from "./core/engine.js";
 
 // Register service worker for offline support (non-blocking)
 registerServiceWorker();
@@ -165,11 +165,7 @@ const start = () => {
     }
     persistReplaySnapshot();
 
-    if (
-      previousState &&
-      !previousState.isGameOver &&
-      state.isGameOver
-    ) {
+    if (previousState && !previousState.isGameOver && state.isGameOver) {
       recordHighScore(localStorage, {
         score: state.score,
         lines: state.lines,
@@ -178,7 +174,11 @@ const start = () => {
     }
 
     if (isFirst) {
-      boardView = createBoardView(nodes.board, state.view.rows, state.view.cols);
+      boardView = createBoardView(
+        nodes.board,
+        state.view.rows,
+        state.view.cols,
+      );
       applyStateToOptionsForm(nodes, state);
     }
 

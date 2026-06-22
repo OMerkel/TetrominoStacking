@@ -24,7 +24,7 @@
 
   <!-- ── Top bar ─────────────────────────────────────────────────── -->
   <header class="topbar">
-    <button id="menu-toggle" class="icon-btn" aria-label="Open menu" aria-haspopup="true">&#9776;</button>
+    <button type="button" id="menu-toggle" class="icon-btn" aria-label="Open menu" aria-haspopup="true">&#9776;</button>
     <h1 class="game-title">Tetromino Stacking</h1>
     <p id="score-label" class="score-label">Score: 0 | Lines: 0 | Running</p>
   </header>
@@ -47,20 +47,20 @@
 
       <div class="sidebar-section controls-pad">
         <div class="controls-row">
-          <button id="rotate-left"  class="ctrl-btn" aria-label="Rotate left">&#8634;</button>
-          <button id="soft-drop"    class="ctrl-btn ctrl-drop" aria-label="Soft drop">&#8595;</button>
-          <button id="rotate-right" class="ctrl-btn" aria-label="Rotate right">&#8635;</button>
+          <button type="button" id="rotate-left"  class="ctrl-btn" aria-label="Rotate left">&#8634;</button>
+          <button type="button" id="soft-drop"    class="ctrl-btn ctrl-drop" aria-label="Soft drop">&#8595;</button>
+          <button type="button" id="rotate-right" class="ctrl-btn" aria-label="Rotate right">&#8635;</button>
         </div>
         <div class="controls-row">
-          <button id="move-left"  class="ctrl-btn" aria-label="Move left">&#8592;</button>
+          <button type="button" id="move-left"  class="ctrl-btn" aria-label="Move left">&#8592;</button>
           <div class="ctrl-spacer"></div>
-          <button id="move-right" class="ctrl-btn" aria-label="Move right">&#8594;</button>
+          <button type="button" id="move-right" class="ctrl-btn" aria-label="Move right">&#8594;</button>
         </div>
         <div class="controls-row">
-          <button id="pause-toggle" class="ctrl-btn ctrl-wide" aria-label="Pause">Pause</button>
+          <button type="button" id="pause-toggle" class="ctrl-btn ctrl-wide" aria-label="Pause">Pause</button>
         </div>
         <div class="controls-row">
-          <button id="restart" class="ctrl-btn ctrl-wide" aria-label="Restart">Restart</button>
+          <button type="button" id="restart" class="ctrl-btn ctrl-wide" aria-label="Restart">Restart</button>
         </div>
       </div>
 
@@ -75,7 +75,7 @@
       <div class="sidebar-section leaderboard">
         <h2 id="leaderboard-label" class="sidebar-label">High Scores (300-399 ms)</h2>
         <ol id="leaderboard-list" class="leaderboard-list" aria-labelledby="leaderboard-label"></ol>
-        <button id="leaderboard-reset" class="ctrl-btn ctrl-wide" aria-label="Reset high scores">Reset scores</button>
+        <button type="button" id="leaderboard-reset" class="ctrl-btn ctrl-wide" aria-label="Reset high scores">Reset scores</button>
       </div>
     </aside>
   </main>
@@ -83,10 +83,12 @@
   <!-- ── Slide-over navigation menu ─────────────────────────────── -->
   <nav id="main-nav" class="main-nav is-hidden" aria-label="Game menu">
     <ul class="nav-list">
-      <li><button id="nav-restart" class="nav-btn">&#8635; Restart</button></li>
-      <li><button id="nav-options" class="nav-btn">&#9881; Options&hellip;</button></li>
-      <li><button id="nav-rules"   class="nav-btn">&#10067; Rules&hellip;</button></li>
-      <li><button id="nav-about"   class="nav-btn">&#9432; About&hellip;</button></li>
+      <li><button type="button" id="nav-close" class="nav-btn nav-close-btn">&#10005; Close</button></li>
+      <li class="nav-divider"></li>
+      <li><button type="button" id="nav-restart" class="nav-btn">&#8635; Restart</button></li>
+      <li><button type="button" id="nav-options" class="nav-btn">&#9881; Options&hellip;</button></li>
+      <li><button type="button" id="nav-rules"   class="nav-btn">&#10067; Rules&hellip;</button></li>
+      <li><button type="button" id="nav-about"   class="nav-btn">&#9432; About&hellip;</button></li>
     </ul>
   </nav>
 
@@ -95,7 +97,7 @@
     <div class="subpage-inner">
       <header class="subpage-header">
         <h2>Options</h2>
-        <button id="options-close" class="icon-btn" aria-label="Close options">&#10005;</button>
+        <button type="button" id="options-close" class="icon-btn" aria-label="Close options">&#10005;</button>
       </header>
       <form class="options-form" onsubmit="return false;">
         <fieldset>
@@ -123,8 +125,8 @@
         </fieldset>
       </form>
       <footer class="subpage-footer">
-        <button id="options-ok"     class="action-btn primary">OK</button>
-        <button id="options-cancel" class="action-btn">Cancel</button>
+        <button type="button" id="options-ok"     class="action-btn primary">OK</button>
+        <button type="button" id="options-cancel" class="action-btn">Cancel</button>
       </footer>
     </div>
   </section>
@@ -134,7 +136,7 @@
     <div class="subpage-inner">
       <header class="subpage-header">
         <h2>Rules</h2>
-        <button id="rules-close" class="icon-btn" aria-label="Close rules">&#10005;</button>
+        <button type="button" id="rules-close" class="icon-btn" aria-label="Close rules">&#10005;</button>
       </header>
       <div class="subpage-body">
         <p>Try to pack falling tetromino shapes as tightly as possible on the grid.
@@ -151,6 +153,9 @@
         </ul>
         <p>Have fun!</p>
       </div>
+      <footer class="subpage-footer">
+        <button type="button" id="rules-back" class="action-btn">← Back</button>
+      </footer>
     </div>
   </section>
 
@@ -159,30 +164,33 @@
     <div class="subpage-inner">
       <header class="subpage-header">
         <h2>About Tetromino Stacking</h2>
-        <button id="about-close" class="icon-btn" aria-label="Close about">&#10005;</button>
+        <button type="button" id="about-close" class="icon-btn" aria-label="Close about">&#10005;</button>
       </header>
       <div class="subpage-body">
         <figure class="author-figure">
           <img src="img/oliver1912.jpg" alt="Oliver Merkel" />
           <figcaption>Oliver Merkel,
-            <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0"
-              target="_blank" rel="noopener">cc-by-nc-nd 4.0</a>.
+            <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-nd/4.0"
+              target="_blank">cc-by-nc-nd 4.0</a>.
           </figcaption>
         </figure>
         <h3>Legal</h3>
-        <p>Copyright &copy; 2019<br />
+        <p>Copyright &copy; 2019, 2026<br />
           <strong>Author:</strong> <em>Oliver Merkel</em>, Merkel(dot)Oliver(at)web(dot)de.<br />
           All rights reserved.<br />
           Logos, brands, and trademarks belong to their respective owners.</p>
         <p>All source code (HTML, JavaScript, CSS) is released under the
           <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a>.</p>
         <p>Graphics (unless stated otherwise) are licensed under
-          <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0"
-            target="_blank" rel="noopener">Creative Commons Attribution-NonCommercial-ShareAlike 4.0</a>.</p>
+          <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0"
+            target="_blank">Creative Commons Attribution-NonCommercial-ShareAlike 4.0</a>.</p>
         <h3>About the Game</h3>
         <p>A Tetromino is a geometric shape composed of exactly four equal-sized squares joined
           edge-to-edge. The concept of stacking such shapes is in the public domain.</p>
       </div>
+      <footer class="subpage-footer">
+        <button type="button" id="about-back" class="action-btn">← Back</button>
+      </footer>
     </div>
   </section>
 

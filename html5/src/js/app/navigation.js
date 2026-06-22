@@ -42,6 +42,10 @@ export const bindNavigationAndSubpages = (nodes, store) => {
     nodes.mainNav.classList.toggle("is-hidden");
   });
 
+  byId("nav-close").addEventListener("click", () => {
+    nodes.mainNav.classList.add("is-hidden");
+  });
+
   byId("nav-restart").addEventListener("click", () => {
     store.dispatch({ type: "RESTART" });
     nodes.mainNav.classList.add("is-hidden");
@@ -67,7 +71,15 @@ export const bindNavigationAndSubpages = (nodes, store) => {
     showGameBoard(nodes, pages);
   });
 
+  byId("rules-back").addEventListener("click", () => {
+    showGameBoard(nodes, pages);
+  });
+
   byId("about-close").addEventListener("click", () => {
+    showGameBoard(nodes, pages);
+  });
+
+  byId("about-back").addEventListener("click", () => {
     showGameBoard(nodes, pages);
   });
 
@@ -91,4 +103,18 @@ export const bindNavigationAndSubpages = (nodes, store) => {
 
   byId("options-cancel").addEventListener("click", cancelOptions);
   byId("options-close").addEventListener("click", cancelOptions);
+
+  // Close any fullscreen page with ESC key
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" || event.key === "Esc") {
+      // Check if any subpage is visible
+      if (!nodes.optionsPage.classList.contains("is-hidden")) {
+        cancelOptions();
+      } else if (!nodes.rulesPage.classList.contains("is-hidden")) {
+        showGameBoard(nodes, pages);
+      } else if (!nodes.aboutPage.classList.contains("is-hidden")) {
+        showGameBoard(nodes, pages);
+      }
+    }
+  });
 };

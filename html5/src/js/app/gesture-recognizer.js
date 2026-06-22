@@ -110,7 +110,10 @@ export class GestureRecognizer {
     // Check for multi-touch (2+ fingers)
     if (this.activePointerIds.size >= 2) {
       this.state = STATE.MULTI_TOUCH;
-    } else if (this.state === STATE.IDLE || this.state === STATE.DOUBLE_TAP_TRACKING) {
+    } else if (
+      this.state === STATE.IDLE ||
+      this.state === STATE.DOUBLE_TAP_TRACKING
+    ) {
       this.state = STATE.TAP_TRACKING;
     }
   }
@@ -141,20 +144,29 @@ export class GestureRecognizer {
     const distance = Math.hypot(dx, dy);
 
     // Detect cancellation: too much movement for tap states
-    if ((this.state === STATE.TAP_TRACKING || this.state === STATE.DOUBLE_TAP_TRACKING) &&
-        distance > this.thresholds.TAP_MAX_DISTANCE) {
+    if (
+      (this.state === STATE.TAP_TRACKING ||
+        this.state === STATE.DOUBLE_TAP_TRACKING) &&
+      distance > this.thresholds.TAP_MAX_DISTANCE
+    ) {
       this.state = STATE.CANCELLED;
       return;
     }
 
     // Multi-touch cancellation
-    if (this.state === STATE.MULTI_TOUCH && distance > this.thresholds.TAP_MAX_DISTANCE) {
+    if (
+      this.state === STATE.MULTI_TOUCH &&
+      distance > this.thresholds.TAP_MAX_DISTANCE
+    ) {
       this.state = STATE.CANCELLED;
       return;
     }
 
     // Classify gesture on move (only if still in tap tracking, i.e., not yet classified)
-    if (this.state === STATE.TAP_TRACKING || this.state === STATE.DOUBLE_TAP_TRACKING) {
+    if (
+      this.state === STATE.TAP_TRACKING ||
+      this.state === STATE.DOUBLE_TAP_TRACKING
+    ) {
       this._classifyGesture(dx, dy, elapsed, pointerId, now);
     } else if (this.state === STATE.HORIZONTAL_SWIPE) {
       this._handleHorizontalSwipe(pointerId, dx, now);
@@ -182,11 +194,17 @@ export class GestureRecognizer {
 
     // Handle state-based completion
     if (this.state === STATE.TAP_TRACKING) {
-      if (elapsed <= this.thresholds.TAP_MAX_TIME && distance <= this.thresholds.TAP_MAX_DISTANCE) {
+      if (
+        elapsed <= this.thresholds.TAP_MAX_TIME &&
+        distance <= this.thresholds.TAP_MAX_DISTANCE
+      ) {
         this._handleTap(now);
       }
     } else if (this.state === STATE.DOUBLE_TAP_TRACKING) {
-      if (elapsed <= this.thresholds.TAP_MAX_TIME && distance <= this.thresholds.TAP_MAX_DISTANCE) {
+      if (
+        elapsed <= this.thresholds.TAP_MAX_TIME &&
+        distance <= this.thresholds.TAP_MAX_DISTANCE
+      ) {
         // Second tap confirmed; already handled in _handleTap
       }
       this.state = STATE.IDLE;
@@ -196,8 +214,11 @@ export class GestureRecognizer {
       this.onFeedback("hard-drop", "strong");
     } else if (this.state === STATE.MULTI_TOUCH) {
       // Check if this was a valid two-finger tap
-      if (this.activePointerIds.size === 2 && elapsed <= this.thresholds.TWO_FINGER_MAX_TIME &&
-          distance <= this.thresholds.TAP_MAX_DISTANCE) {
+      if (
+        this.activePointerIds.size === 2 &&
+        elapsed <= this.thresholds.TWO_FINGER_MAX_TIME &&
+        distance <= this.thresholds.TAP_MAX_DISTANCE
+      ) {
         this._emitAction("TOGGLE_PAUSE");
         this.onFeedback("pause", "medium");
       }
@@ -226,9 +247,11 @@ export class GestureRecognizer {
     const velocity = absDy > 0 && elapsed > 0 ? absDy / (elapsed / 1000) : 0;
 
     // Hard drop: fast downward flick
-    if (dy > this.thresholds.HARD_DROP_MIN_DISTANCE &&
-        velocity > this.thresholds.HARD_DROP_MIN_VELOCITY &&
-        absDx < absDy * 0.5) {
+    if (
+      dy > this.thresholds.HARD_DROP_MIN_DISTANCE &&
+      velocity > this.thresholds.HARD_DROP_MIN_VELOCITY &&
+      absDx < absDy * 0.5
+    ) {
       this.state = STATE.HARD_DROP;
       return;
     }
@@ -241,17 +264,18 @@ export class GestureRecognizer {
     }
 
     // Soft drop: downward swipe (slower than hard drop)
-    if (dy >= this.thresholds.SOFT_DROP_MIN_DISTANCE &&
-        dy <= this.thresholds.SOFT_DROP_MAX_DISTANCE &&
-        absDx < absDy * 0.5) {
+    if (
+      dy >= this.thresholds.SOFT_DROP_MIN_DISTANCE &&
+      dy <= this.thresholds.SOFT_DROP_MAX_DISTANCE &&
+      absDx < absDy * 0.5
+    ) {
       this.state = STATE.SOFT_DROP;
       this._handleSoftDrop(pointerId, dy, now);
       return;
     }
 
     // Hold/swap: upward swipe (minimum upward distance, minimal horizontal movement)
-    if (dy < -this.thresholds.MOVE_MIN_DISTANCE &&
-        absDx < absDy * 0.5) {
+    if (dy < -this.thresholds.MOVE_MIN_DISTANCE && absDx < absDy * 0.5) {
       this._emitAction("HOLD_PIECE");
       this.onFeedback("hold", "medium");
       this.state = STATE.CANCELLED;
@@ -277,7 +301,7 @@ export class GestureRecognizer {
   /**
    * Handle soft drop with action repeat cooldown.
    */
-  _handleSoftDrop(pointerId, dy, now) {
+  _handleSoftDrop(_pointerId, _dy, now) {
     if (now - this.actionRepeatTime >= this.thresholds.ACTION_REPEAT_COOLDOWN) {
       this._emitAction("TICK");
       this.actionRepeatTime = now;
@@ -290,7 +314,10 @@ export class GestureRecognizer {
   _handleTap(now) {
     const timeSinceLastTap = now - this.lastTapTime;
 
-    if (timeSinceLastTap <= this.thresholds.DOUBLE_TAP_MAX_TIME && this.lastTapTime > 0) {
+    if (
+      timeSinceLastTap <= this.thresholds.DOUBLE_TAP_MAX_TIME &&
+      this.lastTapTime > 0
+    ) {
       // Double tap detected; emit rotate left immediately
       this._emitAction("ROTATE_LEFT");
       this.onFeedback("rotate", "light");
@@ -383,15 +410,15 @@ function triggerHaptic(type, intensity) {
   if (!navigator.vibrate) return;
 
   const patterns = {
-    "light": [20],
-    "medium": [40],
-    "strong": [80],
+    light: [20],
+    medium: [40],
+    strong: [80],
     "very-light": [10],
-    "move": [8],
-    "rotate": [20],
-    "hold": [50],
+    move: [8],
+    rotate: [20],
+    hold: [50],
     "hard-drop": [100, 50, 80],
-    "pause": [40, 30, 40],
+    pause: [40, 30, 40],
   };
 
   const pattern = patterns[type] || patterns[intensity] || [30];
@@ -401,7 +428,7 @@ function triggerHaptic(type, intensity) {
 /**
  * Audio feedback (placeholder; implement with Web Audio API or sound sprites).
  */
-function triggerAudio(type) {
+function triggerAudio(_type) {
   // Placeholder: In production, use Web Audio API or preloaded sound sprites
   // Example: play sound from audio context or <audio> element by ID
   // const audioElement = document.getElementById(`sound-${type}`);

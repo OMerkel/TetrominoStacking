@@ -50,6 +50,9 @@
     - [9.4b Touch swipe input](#94b-touch-swipe-input)
     - [9.5 Game Over and Restart](#95-game-over-and-restart)
   - [10. Navigation Flow Diagram](#10-navigation-flow-diagram)
+    - [10.1 Main Navigation Concept](#101-main-navigation-concept)
+      - [Mandatory Requirements](#mandatory-requirements)
+      - [Implementation Location](#implementation-location)
   - [11. Test Architecture and Coverage Strategy](#11-test-architecture-and-coverage-strategy)
     - [11.1 Tooling](#111-tooling)
     - [11.2 Test Files](#112-test-files)
@@ -877,17 +880,87 @@ flowchart LR
   ABOUT[About page]
 
   BOARD -- "click menu-toggle" --> MENU
+  MENU -- "Close" --> BOARD
   MENU -- "Restart → dispatch RESTART" --> BOARD
   MENU -- "Options" --> OPT
   MENU -- "Rules" --> RULES
   MENU -- "About" --> ABOUT
 
   OPT -- "OK → dispatch UPDATE_SETTINGS" --> BOARD
-  OPT -- "Cancel or Close\nrestore form from state" --> BOARD
+  OPT -- "Cancel / Close / ESC\nrestore form from state" --> BOARD
 
-  RULES -- "Close" --> BOARD
-  ABOUT -- "Close" --> BOARD
+  RULES -- "Back / Close / ESC" --> BOARD
+  ABOUT -- "Back / Close / ESC" --> BOARD
 ```
+
+### 10.1 Main Navigation Concept
+
+The **Main Navigation system** is a fundamental architectural component of the application that manages all page-level transitions. It provides a consistent, unified interface for accessing game settings, rules, and information while preserving the game board state.
+
+#### Mandatory Requirements
+
+The Main Navigation implementation is governed by normative requirements. The keywords **MUST**, **MUST NOT**, and **SHALL** are to be interpreted as mandatory constraints.
+
+##### 1. Main Navigation Menu Structure
+
+- The application SHALL provide a left-aligned slide-out navigation overlay opened from the board view by the hamburger button.
+- The menu entry order SHALL be fixed as:
+  - **Close** (first, uppermost entry)
+  - **Visual divider**
+  - **Restart**
+  - **Options**
+  - **Rules**
+  - **About**
+- Menu entry behavior SHALL be:
+  - **Close**: MUST close the menu only and MUST preserve the current view.
+  - **Restart**: MUST dispatch `RESTART`, MUST close the menu, and MUST return to board.
+  - **Options / Rules / About**: MUST close the menu and MUST open the selected fullscreen page.
+- The **Close** entry SHALL be visually distinguished (accent color).
+
+##### 2. Fullscreen Subpages (Topbar Hidden)
+
+- Options, Rules, and About SHALL be rendered as fullscreen overlays using `inset: 0`.
+- Fullscreen overlays MUST cover the complete viewport, including the app title bar.
+- Subpage content areas MUST support scrolling when content exceeds viewport height.
+
+##### 3. Button Availability Per Page
+
+- **Options**
+  - Header SHALL include **Close** (X).
+  - Footer SHALL include **OK** and **Cancel**.
+  - Footer MUST NOT include **Back**.
+- **Rules**
+  - Header SHALL include **Close** (X).
+  - Footer SHALL include **Back**.
+- **About**
+  - Header SHALL include **Close** (X).
+  - Footer SHALL include **Back**.
+
+##### 4. Button Wiring and Behavior
+
+- **Options OK**: MUST dispatch `UPDATE_SETTINGS` with form draft, then MUST return to board.
+- **Options Cancel**: MUST restore form values from current store state, then MUST return to board.
+- **Options Close (X)**: MUST behave identically to **Options Cancel**.
+- **Rules Back / Close (X)**: MUST return to board.
+- **About Back / Close (X)**: MUST return to board.
+- **ESC key**
+  - On Options: MUST behave identically to **Options Cancel**.
+  - On Rules/About: MUST return to board.
+
+##### 5. State Consistency Guarantees
+
+- Opening a subpage MUST NOT pause or otherwise mutate game state.
+- Closing any subpage MUST return focus to the game board.
+- Game state MUST be preserved when navigating between pages.
+- Settings changes MUST be applied only by **OK**; **Cancel** and **Close** MUST discard pending changes.
+
+#### Implementation Location
+
+The Main Navigation system is implemented in:
+
+- **[html5/src/js/app/navigation.js](../html5/src/js/app/navigation.js)** – Event binding and page routing logic
+- **[html5/src/index.html](../html5/src/index.html)** – Semantic markup for menu, subpages, and buttons
+- **[html5/src/css/index.css](../html5/src/css/index.css)** – Fullscreen overlay styling, topbar coverage, button positioning
 
 ---
 

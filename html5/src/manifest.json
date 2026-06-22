@@ -65,7 +65,11 @@
       "description": "Start a new game of Tetromino Stacking",
       "url": "/TetrominoStacking/html5/src/index.html",
       "icons": [
-        { "src": "img/icons/tetromino64.png", "sizes": "64x64", "type": "image/png" }
+        {
+          "src": "img/icons/tetromino64.png",
+          "sizes": "64x64",
+          "type": "image/png"
+        }
       ]
     }
   ],
