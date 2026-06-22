@@ -29,6 +29,13 @@ Runtime Dependencies
 
 This project now runs with framework-free modern JavaScript and has no browser runtime dependencies.
 
+Development Commands
+--------------------
+
+- `npm test` - Runs the standard Vitest suite with coverage thresholds.
+- `npm run test:guard` - Runs Vitest with verbose reporter and coverage as a migration/compatibility guard.
+- `npm run verify:ci` - Runs both standard and guard test passes for CI hardening.
+
 Links
 -----
 

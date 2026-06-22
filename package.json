@@ -9,13 +9,15 @@
     "lint:biome": "biome check .",
     "lint:shellcheck": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/run-shellcheck.ps1",
     "test": "vitest run --coverage",
+    "test:guard": "vitest run --coverage --reporter=verbose",
+    "verify:ci": "npm run test && npm run test:guard",
     "test:watch": "vitest"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@vitest/coverage-v8": "^4.1.9",
     "jsdom": "^24.1.1",
     "markdownlint-cli": "^0.42.0",
-    "vitest": "^2.0.5",
-    "@vitest/coverage-v8": "^2.0.5"
+    "vitest": "^4.1.9"
   }
 }
