@@ -1,8 +1,8 @@
 import {
   createActionBinding,
   createBoardView,
+  createGestureRecognizer,
   createKeyboardMap,
-  createSwipeMap,
   renderHUD,
   renderQueue,
 } from "./app/controller.js";
@@ -16,6 +16,10 @@ import {
   recordHighScore,
 } from "./app/leaderboard.js";
 import { projectBoardWithActivePiece } from "./core/engine.js";
+import { registerServiceWorker } from "./app/service-worker-client.js";
+
+// Register service worker for offline support (non-blocking)
+registerServiceWorker();
 
 const byId = (id) => document.getElementById(id);
 const REPLAY_STORAGE_KEY = "tetromino.replay.v1";
@@ -59,7 +63,11 @@ const bindGameActions = (store) => {
   bind("restart", { type: "RESTART" });
 
   unsubs.push(createKeyboardMap(store.dispatch));
-  unsubs.push(createSwipeMap(nodes.board, store.dispatch));
+  unsubs.push(
+    createGestureRecognizer(nodes.board, store.dispatch, {
+      preset: "standard",
+    }),
+  );
   return () => {
     for (const unsub of unsubs) {
       unsub();

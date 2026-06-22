@@ -1,5 +1,6 @@
 import { PIECE_COLORS } from "../core/constants.js";
 import { cellsForPiece } from "../core/tetrominoes.js";
+import { createGestureRecognizer } from "./gesture-recognizer.js";
 
 const wait = (ms) =>
   new Promise((resolve) => {
@@ -127,44 +128,7 @@ export const createKeyboardMap = (dispatch) => {
   return () => window.removeEventListener("keydown", listener);
 };
 
-export const createSwipeMap = (element, dispatch) => {
-  const MIN_SWIPE_PX = 30;
-  let startX = 0;
-  let startY = 0;
-
-  const onTouchStart = (event) => {
-    const touch = event.changedTouches[0];
-    startX = touch.clientX;
-    startY = touch.clientY;
-  };
-
-  const onTouchEnd = (event) => {
-    event.preventDefault();
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - startX;
-    const dy = touch.clientY - startY;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-
-    if (absDx < MIN_SWIPE_PX && absDy < MIN_SWIPE_PX) {
-      dispatch({ type: "ROTATE_RIGHT" });
-      return;
-    }
-
-    if (absDx >= absDy) {
-      dispatch({ type: dx > 0 ? "MOVE_RIGHT" : "MOVE_LEFT" });
-    } else {
-      dispatch({ type: dy > 0 ? "TICK" : "HARD_DROP" });
-    }
-  };
-
-  element.addEventListener("touchstart", onTouchStart, { passive: true });
-  element.addEventListener("touchend", onTouchEnd);
-  return () => {
-    element.removeEventListener("touchstart", onTouchStart);
-    element.removeEventListener("touchend", onTouchEnd);
-  };
-};
+export { createGestureRecognizer };
 
 export const startTicker = async (store, signal) => {
   while (!signal.aborted) {

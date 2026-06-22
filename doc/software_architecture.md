@@ -16,6 +16,7 @@
     - [4.2 Application Layer (`js/app/`)](#42-application-layer-jsapp)
       - [`store.js`](#storejs)
       - [`controller.js`](#controllerjs)
+      - [`gesture-recognizer.js`](#gesture-recognizerjs)
       - [`worker.js`](#workerjs)
       - [`navigation.js`](#navigationjs)
     - [4.3 Presentation (`html5/src/`)](#43-presentation-html5src)
@@ -24,9 +25,21 @@
   - [5. Dependency Diagram](#5-dependency-diagram)
   - [6. State Model](#6-state-model)
     - [Action Catalogue](#action-catalogue)
-    - [Swipe Gesture Map](#swipe-gesture-map)
+    - [Gesture Recognition](#gesture-recognition)
     - [Replay Snapshot Persistence](#replay-snapshot-persistence)
     - [Leaderboard Persistence](#leaderboard-persistence)
+  - [6.5 Offline Support and PWA](#65-offline-support-and-pwa)
+    - [Service Worker Architecture](#service-worker-architecture)
+    - [Registration and Lifecycle](#registration-and-lifecycle)
+    - [PWA Manifest](#pwa-manifest)
+    - [Offline Behavior](#offline-behavior)
+    - [Browser Support](#browser-support)
+    - [Installation Instructions by Platform](#installation-instructions-by-platform)
+      - [Android (Chrome, Firefox, Edge)](#android-chrome-firefox-edge)
+      - [iOS (Safari 11.3+)](#ios-safari-113)
+      - [Desktop (Chrome, Edge)](#desktop-chrome-edge)
+      - [Mac/Linux](#maclinux)
+    - [Implementation Notes](#implementation-notes)
   - [7. State Chart](#7-state-chart)
   - [8. Runtime Workflow Diagram](#8-runtime-workflow-diagram)
   - [9. Object Message Exchange](#9-object-message-exchange)
@@ -197,7 +210,50 @@ DOM rendering helpers and event wiring:
 | `renderHUD(scoreNode, pauseBtn, state)` | Update score/status text |
 | `createActionBinding(el, ev, factory, dispatch)` | Attach and return a removable event listener |
 | `createKeyboardMap(dispatch)` | Map keyboard codes to game actions |
-| `createSwipeMap(element, dispatch)` | Map touch swipe/tap gestures on an element to game actions |
+
+#### `gesture-recognizer.js`
+
+Sophisticated multi-gesture recognition engine using a state machine and PointerEvent API:
+
+| Export | Description |
+| --- | --- |
+| `GestureRecognizer` class | State machine that recognizes 8 gestures with threshold validation, conflict resolution, and cooldown management |
+| `createGestureRecognizer(element, dispatch, config)` | Factory attaches recognizer to a DOM element and returns an unsubscribe function |
+
+**Supported Gestures:**
+
+| Gesture | Action | Threshold |
+| --- | --- | --- |
+| Tap | `ROTATE_RIGHT` | <15px movement, <300ms |
+| Double Tap | `ROTATE_LEFT` | Second tap within 400ms, <15px each |
+| Swipe Left | `MOVE_LEFT` (repeat 80ms) | >40px horizontal, <50% vertical |
+| Swipe Right | `MOVE_RIGHT` (repeat 80ms) | >40px horizontal, <50% vertical |
+| Swipe Down | `TICK` (repeat 60ms) | 20–100px down, <50% horizontal |
+| Flick Down | `HARD_DROP` | >100px at >200px/s velocity |
+| Swipe Up | `HOLD_PIECE` | >50px up, <50% horizontal |
+| Two-Finger Tap | `TOGGLE_PAUSE` | <300ms, <15px per pointer |
+
+**Key Features:**
+
+- 8-state machine (IDLE, TAP_TRACKING, DOUBLE_TAP_TRACKING, HORIZONTAL_SWIPE, SOFT_DROP, HARD_DROP, MULTI_TOUCH, CANCELLED)
+- Per-pointer state tracking for multi-touch scenarios
+- Conflict resolution by priority (hard drop > horizontal > vertical)
+- Cooldown system prevents input spam
+- 3 sensitivity presets: casual, standard (default), competitive
+- Optional haptic/audio feedback callbacks
+- Full PointerEvent API support (mouse, touch, pen)
+
+**Configuration:**
+
+```javascript
+const recognizer = createGestureRecognizer(boardElement, store.dispatch, {
+  preset: 'standard',        // or 'casual' / 'competitive'
+  onGesture: (action) => {}, // optional callback for custom handling
+  onFeedback: (type, intensity) => {} // optional haptic/audio integration
+});
+```
+
+See [doc/gesture_controls_spec.md](gesture_controls_spec.md) for complete specification.
 
 #### `worker.js`
 
@@ -293,32 +349,36 @@ graph TD
 
 The complete game state is a plain JavaScript object:
 
-```text
-GameState {
-  board       : Cell[][]      // BOARD_ROWS × BOARD_COLS; Cell = PieceType | null
-  active      : Piece         // currently falling piece
-  queue       : PieceType[]   // look-ahead queue (INITIAL_QUEUE_SIZE items)
-  score       : number
-  lines       : number
-  isPaused    : boolean
-  isGameOver  : boolean
-  seed        : number        // LCG seed for the next random draw
-  settings    : Settings      // tickMs, colorMode, mainColor
-  view        : ViewMeta      // rows, cols, hiddenRows (for rendering offset)
-}
+```mermaid
+classDiagram
+    class GameState {
+      +Cell[][] board
+      +Piece active
+      +PieceType[] queue
+      +number score
+      +number lines
+      +boolean isPaused
+      +boolean isGameOver
+      +number seed
+      +Settings settings
+      +ViewMeta view
+    }
 
-Piece {
-  type        : "I"|"O"|"T"|"S"|"Z"|"J"|"L"
-  rotation    : 0 | 1 | 2 | 3
-  x           : number        // column of piece origin
-  y           : number        // row of piece origin
-}
+    class Piece {
+      +PieceType type
+      +0..3 rotation
+      +number x
+      +number y
+    }
 
-Settings {
-  tickMs      : number
-  colorMode   : "mono" | "multi"
-  mainColor   : string        // CSS colour string
-}
+    class Settings {
+      +number tickMs
+      +"mono"|"multi" colorMode
+      +string mainColor
+    }
+
+    GameState --> Piece : active
+    GameState --> Settings : settings
 ```
 
 ### Action Catalogue
@@ -332,34 +392,38 @@ Settings {
 | `ROTATE_LEFT` | – | Rotate counter-clockwise with wall-kick |
 | `ROTATE_RIGHT` | – | Rotate clockwise with wall-kick |
 | `HARD_DROP` | – | Drop active piece to lowest valid position |
+| `HOLD_PIECE` | – | Hold or swap active piece with reserve (gesture input only) |
 | `TOGGLE_PAUSE` | – | Toggle `isPaused` (no-op when game over) |
 | `UPDATE_SETTINGS` | `{ tickMs?, colorMode?, mainColor? }` | Merge new settings |
 | `RESTART` | `{ seed? }` | Reset to fresh initial state |
 
-### Swipe Gesture Map
+### Gesture Recognition
 
-`createSwipeMap(element, dispatch)` listens for `touchstart`/`touchend` on the board element.
-A minimum of 30 px travel distinguishes a swipe from a tap.
+The game uses `GestureRecognizer` for sophisticated multi-gesture touch input via PointerEvent API.
+Key capabilities:
 
-| Gesture | Action |
-| --- | --- |
-| Swipe left | `MOVE_LEFT` |
-| Swipe right | `MOVE_RIGHT` |
-| Swipe down | `TICK` (soft drop) |
-| Swipe up | `HARD_DROP` |
-| Tap (< 30 px) | `ROTATE_RIGHT` |
+- **State machine approach** ensures unambiguous gesture classification with conflict resolution
+- **8-gesture language**: tap, double-tap, 4-direction swipes, flick, multi-touch pause, hold
+- **Velocity-based hard drop detection** (>200px/s) enables fast downward flicks
+- **Cooldown management** prevents repeated action spam (80ms for moves, 60ms for soft drops)
+- **Sensitivity presets** (casual/standard/competitive) for different play styles
+- **Per-pointer tracking** enables reliable multi-touch operations (e.g., two-finger pause)
+- **Pointer lifecycle management** prevents state leaks across gesture sequences
+
+Integration: `createGestureRecognizer()` instantiated in `bindGameActions()` within `app.js` on `#board` element.
 
 ### Replay Snapshot Persistence
 
 The main thread persists replay data in `localStorage` under key
 `tetromino.replay.v1`.
 
-```text
-ReplaySnapshot {
-  seed      : number
-  actionLog : Action[]
-  updatedAt : number   // epoch milliseconds
-}
+```mermaid
+classDiagram
+    class ReplaySnapshot {
+      +number seed
+      +Action[] actionLog
+      +number updatedAt
+    }
 ```
 
 - `seed` is taken from the latest worker state.
@@ -373,22 +437,196 @@ High scores are persisted in `localStorage` under key `tetromino.leaderboard.v1`
 Scores are bucketed by tick-delay ranges (100 ms buckets) so only comparable
 game speeds compete with each other.
 
-```text
-LeaderboardStore {
-  buckets: {
-    "300-399": [
-      { score, lines, tickMs, at },
-      ...
-    ],
-    ...
-  }
-}
+```mermaid
+classDiagram
+    class LeaderboardEntry {
+      +number score
+      +number lines
+      +number tickMs
+      +number at
+    }
+
+    class LeaderboardBucket {
+      +string rangeKey
+      +LeaderboardEntry[] entries
+    }
+
+    class LeaderboardStore {
+      +Map~string, LeaderboardEntry[]~ buckets
+    }
+
+    LeaderboardStore --> LeaderboardBucket : logical view
+    LeaderboardBucket --> LeaderboardEntry : contains
 ```
 
 - Comparability is range-based: e.g. `300 ms` and `350 ms` are in `300-399 ms`.
 - Each range keeps at most 10 entries, sorted by score then lines.
 - Entries older than 30 days are pruned automatically.
 - Manual reset clears all leaderboard data via the Reset scores button.
+
+---
+
+## 6.5 Offline Support and PWA
+
+The app implements **offline-first caching** via a Service Worker, enabling players to continue
+playing even when disconnected from the internet. Game progress and leaderboard data persist
+across sessions via `localStorage`.
+
+### Service Worker Architecture
+
+**File:** `html5/src/service-worker.js` (~150 lines)
+
+Implements dual caching strategies based on asset type:
+
+| Asset Type | Strategy | Purpose | Cache |
+| --- | --- | --- | --- |
+| CSS, Images, Icons | Cache-first | Fast load, stale OK | `tetromino-static-v1` |
+| HTML, JavaScript | Network-first | Latest code/UI, fallback cache | `tetromino-dynamic-v1` |
+| Non-GET requests | Skipped | External calls, API requests | – |
+
+**Cache-first flow:** Check cache → serve if hit → fetch from network in background → update cache on success
+
+**Network-first flow:** Try network with 3s timeout → cache on success → fallback to cache on network failure → offline placeholder as last resort
+
+### Registration and Lifecycle
+
+**File:** `html5/src/js/app/service-worker-client.js`
+
+Client-side registration module (`registerServiceWorker()`) handles:
+
+- Browser support detection (graceful no-op if unsupported)
+- Service worker installation at scope `/TetrominoStacking/html5/src/`
+- Automatic cache cleanup on activation (removes old cache versions)
+- Update detection and signaling via `sw-update-ready` custom event
+- Online/offline status monitoring via `onOnlineStatusChange()` hook
+
+### PWA Manifest
+
+**File:** `html5/src/manifest.json`
+
+Declares Progressive Web App metadata:
+
+```json
+{
+  "name": "Tetromino Stacking",
+  "start_url": "/TetrominoStacking/html5/src/index.html",
+  "scope": "/TetrominoStacking/html5/src/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a1a",
+  "categories": ["games"]
+}
+```
+
+Enables:
+
+- **Installation on home screen** (Android, iOS, desktop)
+- **Standalone display** (full screen, hides browser chrome)
+- **Custom theme color** (matches app color scheme)
+- **App shortcuts** (quick "New Game" action)
+- **Share target** (receives shared content via web intent)
+
+### Offline Behavior
+
+When network is unavailable:
+
+1. **Static assets** served from cache (always available after first visit)
+2. **HTML/JS** served from cache if available, else offline notice
+3. **Game state** fully playable using cached assets
+4. **Leaderboard** works with local `localStorage` (no network needed)
+5. **Replay snapshots** persist and can be reviewed offline
+
+**Fallback responses:**
+
+- Missing HTML → Informative offline page with status and guidance
+- Missing images → Placeholder SVG with warning icon
+- Missing JS → 503 Service Unavailable (app requires JS)
+
+### Browser Support
+
+**Service Worker API support:**
+
+- ✅ Chrome/Edge 40+
+- ✅ Firefox 44+
+- ✅ Safari 11.1+ (iOS 11.3+)
+- ⚠️ IE 11: Graceful degradation (online-only)
+
+**PWA Installation Requirements Met:**
+
+✅ HTTPS required (or `localhost` for development)
+✅ Valid manifest.json with required fields
+✅ Service worker with install handler
+✅ Icons in multiple sizes (32px, 64px, 128px)
+✅ Maskable icons for adaptive display
+✅ App name, description, theme color
+✅ `display: "standalone"` for full-screen mode
+✅ Scope and start_url aligned
+✅ iOS web app meta tags enabled
+
+### Installation Instructions by Platform
+
+#### Android (Chrome, Firefox, Edge)
+
+1. Visit the app (or bookmark it)
+2. Look for install prompt (banner or menu option)
+3. Tap "Install" or menu → "Install app"
+4. Confirm: app appears on home screen
+
+**If no prompt appears:**
+
+- Manually: Long-press home → "Add to home screen" → select "Tetromino Stacking"
+
+#### iOS (Safari 11.3+)
+
+1. Visit the app in Safari
+2. Tap **Share** (bottom toolbar)
+3. Select **"Add to Home Screen"**
+4. Name: defaults to "Tetromino Stacking" (can customize)
+5. Tap **Add** → app appears on home screen
+
+**Features on iOS:**
+
+- Runs in standalone mode (full screen, hides browser chrome)
+- Offline support via service worker
+- Leaderboard and replay data persist
+- Status bar respects `black-translucent` style
+
+#### Desktop (Chrome, Edge)
+
+1. Visit the app
+2. Look for install icon (URL bar, top-right)
+3. Click install icon or menu → "Install Tetromino Stacking"
+4. Confirm: app launches in standalone window
+
+**Features:**
+
+- Installs as standalone application
+- Shortcut on desktop/start menu
+- Independent window (not in browser tab)
+- All offline features available
+
+#### Mac/Linux
+
+Chrome, Edge, Chromium-based browsers support install via menu → "Install app" after meeting installability criteria.
+
+### Implementation Notes
+
+1. **Manifest requirements:** `manifest.json` must be valid JSON with required fields (`name`, `start_url`, `scope`, `display`, `icons`). Served with `Content-Type: application/manifest+json` header preferred (not required).
+
+2. **Icon strategy:** Provide icons at multiple sizes (32x32 favicon, 64x64, 128x128) with both `purpose: "any"` and `purpose: "maskable"` entries. Maskable icons fill the safe zone on devices with non-rectangular displays.
+
+3. **Cache version strategy:** Append `-v1` suffix to cache names. Increment version to bust all caches globally on service worker update.
+
+4. **Network timeout:** 3s threshold prevents hanging on slow/unstable connections. Falls back to cache gracefully.
+
+5. **No cache for user data:** Game state, replay snapshots, and leaderboards are never cached
+   (stored in `localStorage` instead for guaranteed freshness).
+
+6. **Update detection:** `sw-update-ready` event fires when new service worker installs.
+   App can display "Update available" UI; users can reload to activate.
+
+7. **Scope isolation:** Service worker scoped to `/TetrominoStacking/html5/src/` to avoid
+   affecting other apps on the same domain.
 
 ---
 
@@ -433,7 +671,7 @@ flowchart TD
     A([DOMContentLoaded])
     B["new Worker worker.js"]
     C[bindNavigationAndSubpages]
-    D[bindGameActions / createKeyboardMap / createSwipeMap]
+    D[bindGameActions / createKeyboardMap / createGestureRecognizer]
     E{"first STATE message?"}
     F[createBoardView + applyStateToOptionsForm]
     G[paint state]
@@ -580,7 +818,7 @@ sequenceDiagram
 sequenceDiagram
   actor User
   participant Board as #board element
-  participant SwipeMap as createSwipeMap
+    participant GestureRec as createGestureRecognizer
   participant Store
   participant Reducer as gameReducer
   participant View
@@ -671,6 +909,7 @@ flowchart LR
 | `tests/tetrominoes.test.js` | node | Rotation normalisation, absolute cell projection |
 | `tests/engine.test.js` | node | Board creation, collision detection, line clearing, all reducer actions, wall kick, projection |
 | `tests/store.test.js` | node | Subscribe/dispatch/unsubscribe, no-notification on identity-equal state |
+| `tests/gesture-recognizer.test.js` | node | Gesture state machine, tap/double-tap/swipe recognition, sensitivity presets, feedback callbacks, pointer cleanup |
 | `tests/navigation.test.js` | jsdom | Menu toggle, page routing, options OK/Cancel, delay output sync, restart |
 | `tests/index-smoke.test.js` | jsdom | Loads real `index.html` body; asserts expected DOM structure and full navigation flow |
 
@@ -687,7 +926,7 @@ thresholds: {
 }
 ```
 
-Current achieved coverage: **100 % statements, 100 % branches, 100 % functions, 100 % lines**.
+Current achieved coverage: **100 % statements, 98.61 % branches, 100 % functions, 100 % lines** (170/170 statements, 71/72 branches, 45/45 functions, 153/153 lines).
 
 ### 11.4 Coverage Scope
 
@@ -695,6 +934,7 @@ Coverage is scoped to the pure-logic modules:
 
 - `html5/src/js/core/**/*.js`
 - `html5/src/js/app/store.js`
+- `html5/src/js/app/gesture-recognizer.js`
 
 DOM-coupled controller and navigation code is exercised via integration tests
 (`navigation.test.js`, `index-smoke.test.js`) but excluded from the hard threshold gate
@@ -704,39 +944,44 @@ to keep the threshold meaningful rather than inflated by trivially-covered glue 
 
 ## 12. File Structure
 
-```text
-html5/src/
-├── index.html              – application shell (no framework dependencies)
-├── css/
-│   └── index.css           – standalone dark theme, CSS custom properties
-├── img/
-│   ├── icons/              – app icons (various resolutions)
-│   └── oliver1912.jpg      – author photo (About page)
-└── js/
-    ├── app.js              – composition root; proxy store; Worker wiring
-    ├── app/
-    │   ├── controller.js   – rendering helpers, keyboard map, swipe map
-    │   ├── leaderboard.js  – localStorage high score buckets and pruning
-    │   ├── navigation.js   – subpage routing, options form binding
-    │   ├── store.js        – reactive store (used inside the Worker)
-    │   └── worker.js       – Web Worker: game state, ticker, engine
-    └── core/
-        ├── constants.js    – game constants
-        ├── engine.js       – pure game reducer and helpers
-        ├── random.js       – deterministic LCG
-        └── tetrominoes.js  – piece rotation data and cell projection
+```mermaid
+flowchart TD
+  ROOT[Project Root]
 
-tests/
-├── engine.test.js
-├── index-smoke.test.js
-├── leaderboard.test.js
-├── navigation.test.js
-├── random.test.js
-├── store.test.js
-└── tetrominoes.test.js
+  ROOT --> SRC[html5/src]
+  SRC --> SRC_INDEX[index.html<br/>application shell]
+  SRC --> CSS[css]
+  CSS --> CSS_INDEX[index.css<br/>dark theme and CSS variables]
+  SRC --> IMG[img]
+  IMG --> ICONS[icons]
+  IMG --> AUTHOR_IMG[oliver1912.jpg<br/>About page]
+  SRC --> JS[js]
+  JS --> APP_JS[app.js<br/>composition root and Worker wiring]
+  JS --> APP_DIR[app]
+  APP_DIR --> CONTROLLER[controller.js<br/>rendering and input maps]
+  APP_DIR --> GESTURE[gesture-recognizer.js<br/>multi-gesture state machine]
+  APP_DIR --> LEADERBOARD[leaderboard.js<br/>high score persistence]
+  APP_DIR --> NAVIGATION[navigation.js<br/>subpage routing]
+  APP_DIR --> STORE[store.js<br/>reactive store]
+  APP_DIR --> WORKER[worker.js<br/>game loop and reducer host]
+  JS --> CORE_DIR[core]
+  CORE_DIR --> CONSTANTS[constants.js]
+  CORE_DIR --> ENGINE[engine.js]
+  CORE_DIR --> RANDOM[random.js]
+  CORE_DIR --> TETROMINOES[tetrominoes.js]
 
-doc/
-└── software_architecture.md  – this document
+  ROOT --> TESTS[tests]
+  TESTS --> T_ENGINE[engine.test.js]
+  TESTS --> T_GESTURE[gesture-recognizer.test.js]
+  TESTS --> T_SMOKE[index-smoke.test.js]
+  TESTS --> T_LEADERBOARD[leaderboard.test.js]
+  TESTS --> T_NAVIGATION[navigation.test.js]
+  TESTS --> T_RANDOM[random.test.js]
+  TESTS --> T_STORE[store.test.js]
+  TESTS --> T_TETROMINOES[tetrominoes.test.js]
+
+  ROOT --> DOC[doc]
+  DOC --> ARCH_DOC[software_architecture.md]
 ```
 
 ---

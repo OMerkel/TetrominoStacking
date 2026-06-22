@@ -1,0 +1,81 @@
+{
+  "name": "Tetromino Stacking",
+  "short_name": "Tetromino",
+  "description": "Pack falling tetromino shapes on a grid in this classic solitaire game",
+  "start_url": "/TetrominoStacking/html5/src/index.html",
+  "scope": "/TetrominoStacking/html5/src/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1a1a1a",
+  "background_color": "#1a1a1a",
+  "dir": "ltr",
+  "lang": "en",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "img/icons/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icons/tetromino64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icons/tetromino128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icons/tetromino128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "img/icons/tetromino64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["games"],
+  "screenshots": [
+    {
+      "src": "img/icons/tetromino128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "img/icons/tetromino128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Game",
+      "short_name": "Play",
+      "description": "Start a new game of Tetromino Stacking",
+      "url": "/TetrominoStacking/html5/src/index.html",
+      "icons": [
+        { "src": "img/icons/tetromino64.png", "sizes": "64x64", "type": "image/png" }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/TetrominoStacking/html5/src/index.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  }
+}
