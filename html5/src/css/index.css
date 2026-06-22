@@ -93,6 +93,8 @@ label {
   border-radius: var(--radius);
   padding: var(--gap);
   outline: none;
+  touch-action: none;
+  pointer-events: auto;
 }
 
 .cell {
