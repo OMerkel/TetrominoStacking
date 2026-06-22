@@ -18,7 +18,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "glob": "^13.0.6",
     "jsdom": "^24.1.1",
-    "markdownlint-cli": "^0.42.0",
+    "markdownlint-cli": "^0.49.0",
     "vitest": "^4.1.9"
   }
 }
